@@ -1,4 +1,17 @@
 <?php
+// Allow from any origin (adjust this to your domain for security)
+header("Access-Control-Allow-Origin: *");
+// Allow specific HTTP methods
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+// Allow specific headers
+header("Access-Control-Allow-Headers: Content-Type");
+
+// Handle preflight OPTIONS request
+if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
+    http_response_code(200);
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data
     $name = strip_tags(trim($_POST["name"]));
