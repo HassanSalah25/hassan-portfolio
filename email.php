@@ -1,33 +1,45 @@
 <?php
-$subject = 'You Got Message'; // Subject of your email
-$to = 'info@designesia.com';  //Recipient's E-mail
-$emailTo = $_REQUEST['email'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get form data
+    $name = strip_tags(trim($_POST["name"]));
+    $email = filter_var(trim($_POST["email"]), FILTER_SANITIZE_EMAIL);
+    $phone = strip_tags(trim($_POST["phone"]));
+    $message = strip_tags(trim($_POST["message"]));
 
-$name = $_REQUEST['name'];
-$email = $_REQUEST['email'];
-$phone = $_REQUEST['phone'];
-$msg = $_REQUEST['message'];
+    // Check if data is valid
+    if (empty($name) || empty($message) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        // Set a 400 (bad request) response code and exit
+        http_response_code(400);
+        echo "Please complete the form and try again.";
+        exit;
+    }
 
-$email_from = $name.'<'.$email.'>';
+    // Set your email address
+    $recipient = "salemhassan175@gmail.com";
+    $subject = "New contact from $name";
 
-$headers = "MIME-Version: 1.1";
-$headers .= "Content-type: text/html; charset=iso-8859-1";
-$headers .= "From: ".$name.'<'.$email.'>'."\r\n"; // Sender's E-mail
-$headers .= "Return-Path:"."From:" . $email;
+    // Build the email content
+    $email_content = "Name: $name\n";
+    $email_content .= "Email: $email\n";
+    $email_content .= "Phone: $phone\n\n";
+    $email_content .= "Message:\n$message\n";
 
-$message .= 'Name : ' . $name . "\n";
-$message .= 'Email : ' . $email . "\n";
-$message .= 'Phone : ' . $phone . "\n";
-$message .= 'Message : ' . $msg;
+    // Build the email headers
+    $email_headers = "From: $name <$email>";
 
-if (@mail($to, $subject, $message, $email_from))
-{
-	// Transfer the value 'sent' to ajax function for showing success message.
-	echo 'sent';
-}
-else
-{
-	// Transfer the value 'failed' to ajax function for showing error message.
-	echo 'failed';
+    // Send the email
+    if (mail($recipient, $subject, $email_content, $email_headers)) {
+        // Set a 200 (okay) response code
+        http_response_code(200);
+        echo "Your message has been sent successfully.";
+    } else {
+        // Set a 500 (internal server error) response code
+        http_response_code(500);
+        echo "Sorry, an error occurred while sending your message.";
+    }
+} else {
+    // Not a POST request, set a 403 (forbidden) response code
+    http_response_code(403);
+    echo "There was a problem with your submission, please try again.";
 }
 ?>
